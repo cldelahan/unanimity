@@ -5,14 +5,6 @@ from logic import controller
 app = Flask(__name__)
 CORS(app)
 
-# Path and method
-# Google.com/search -> /search = path
-# Methods: GET / POST / PATCH / DELETE
-
-# Front end sends request to server - I interpret and send response
-# How to listen for these requests? Based on path and method
-
-
 '''
 @app.route('/trends/<field>')
 def get_trends_for_field(field):
@@ -24,12 +16,43 @@ def get_trends_for_field(field):
     })
 '''
 
-
-@app.route("/", methods = ["GET"]) #second is method
+# Check that server is online
+@app.route("/", methods = ["GET"])
 def index():
     return jsonify({
         'success': True,
         'data': 'Server is Live!'})
+
+
+#########################################
+############  GET METHODS  ##############
+#########################################
+
+
+# Given an email, return all relevant session information
+# TODO
+@app.route("/user/<email>", methods = ["GET"])
+def get_all_sessions():
+    return jsonify({
+            'success': True,
+            'data': 'Server is Live!'})
+
+
+
+
+# Given a sessionID, return the content for the voting screen
+@app.route("/session/<sessionID>", methods = ["GET"])
+def get_session_screen(sessionID):
+    result = controller.get_session_screen_data(sessionID)
+    if (result == None):
+        return jsonify({
+            'success': False,
+            })
+    return jsonify({
+            'success': True,
+            'data': result
+        })
+
 
 
 #######################
