@@ -1,47 +1,23 @@
-import './App.css';
-import ServerWrapper from "./logic/ServerWrapper";
-import {Component} from "react";
+import React, {Component} from 'react';
+import { BrowserRouter as Router, Route, Switch} from 'react-router-dom';
+
+import { VotingPortal } from './VotingPortal';
+import { Home } from './Home';
+import {CreateSession} from "./CreateSession";
+
 
 class App extends Component {
-
-    constructor(props) {
-        super(props);
-        this.state = {
-            'loaded': false,
-            'data': "Loading Content"
-        };
-        this.loadContent().then(r => {}, r => {
-            alert("Loading page failed: " + r);
-        });
-    }
-
-    async loadContent() {
-        const result = await ServerWrapper.getServerStatus();
-        console.log(result);
-        this.setState({
-            'loaded': true,
-            'data': result ? result : "Server Error"
-        });
-    }
-
     render() {
         return (
-            <div className="App">
-                <header className="App-header">
-                    {this.state.data}
-                    <p>
-                        Edit <code>src/App.js</code> and save to reload.
-                    </p>
-                    <a
-                        className="App-link"
-                        href="https://reactjs.org"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                    >
-                        Learn React
-                    </a>
-                </header>
-            </div>
+            <React.Fragment>
+                    <Router>
+                        <Switch>
+                            <Route path="/createsession/" component={CreateSession}/>
+                            <Route path="/session/:key" component={VotingPortal}/>
+                            <Route path="/" component={Home}/>
+                        </Switch>
+                    </Router>
+            </React.Fragment>
         );
     }
 }
