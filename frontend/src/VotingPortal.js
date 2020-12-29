@@ -53,6 +53,12 @@ class VotingPortal extends Component {
             if (window.confirm("Your percentages do not sum to 100%. Would you like to normalize? " +
                 " (Notice: Hitting OK will submit the normalized percentages. This process cannot be undone)")) {
                 // Normalize, submit, and leave the page
+                const ratio = 100. / sum;
+                const keys = Object.keys(this.state.votes);
+                for (let i = 0; i < keys.length; i++) {
+                    this.state.votes[keys[i]] *= ratio;
+                }
+                await ServerWrapper.postVotesToDatabase(this.state.sessionID, this.state.votes);
                 window.location = "/";
             } else {
                 // Do nothing
@@ -61,6 +67,7 @@ class VotingPortal extends Component {
             if (window.confirm("Are you sure you want to submit. Notice: this action cannot be undone. ")) {
                 // Submit and leave the page
                 await ServerWrapper.postVotesToDatabase(this.state.sessionID, this.state.votes);
+                window.location = "/";
             } else {
                 // Do nothing
             }
