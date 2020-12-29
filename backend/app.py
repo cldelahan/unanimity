@@ -4,6 +4,7 @@ from logic import controller
 
 app = Flask(__name__)
 CORS(app)
+app.config['CORS_HEADERS'] = 'Content-Type'
 
 '''
 @app.route('/trends/<field>')
@@ -39,7 +40,6 @@ def get_all_sessions():
 
 
 
-
 # Given a sessionID, return the content for the voting screen
 @app.route("/session/<sessionID>", methods = ["GET"])
 def get_session_screen(sessionID):
@@ -52,6 +52,18 @@ def get_session_screen(sessionID):
             'success': True,
             'data': result
         })
+
+
+# Given a sessionID, the voterID, and the votes, cast the votes for that user
+@app.route("/session/<sessionID>", methods = ["POST"])
+def post_vote(sessionID):
+    # print(request.json)
+    votes = request.get_json()
+    print(votes)
+    res = controller.vote(sessionID, votes)
+    return jsonify({
+        'success': res
+    })
 
 
 

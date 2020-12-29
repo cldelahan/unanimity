@@ -42,7 +42,7 @@ class Home extends Component {
                         <ReactCodeInput
                             className={'Code-input'}
                             type={'text'}
-                            fields={6}
+                            fields={7}
                             title={'Enter Invite Code Below'}
                             onComplete={this.onCodeInput}
                         />

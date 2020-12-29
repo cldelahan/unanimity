@@ -58,6 +58,9 @@ def get_session_screen_data(sessionID):
     if (userID not in doc['voting']):
         canVote = True
     voterNames = turn_obj_ids_to_name(voterIDs)
+    retVoterIDs = []
+    for i in voterIDs:
+        retVoterIDs.append(i.__str__())
 
     print(userID)
     print(voterIDs)
@@ -67,11 +70,12 @@ def get_session_screen_data(sessionID):
 
 
     result = {
-        "_id" : doc["_id"],
-        "title" : doc["name"],
+        "_id" : doc["_id"].__str__(),
+        "title" : doc["title"],
         "userName" : voterNames[index],
         "canVote": canVote,
-        "names": voterNames
+        "names": voterNames,
+        "userIDs": retVoterIDs
     }
     return result
 
@@ -97,3 +101,40 @@ def turn_obj_ids_to_name(ids):
         for r in result:
             names.append(r["name"])
     return names
+
+
+'''
+Takes a sessionID, and a voting JSON object, and sets the vote
+INPUT:
+    sessionID, userID, { user1: percent1, user2: percent2 }
+OUTPUT: True / False
+
+'''
+def vote(sessionID, votes):
+    if (db == None):
+        return None
+    sess_col = db[SESS_COL]
+    query = {'sessionIDs.' + sessionID : {"$exists" : True}}
+    doc = sess_col.find(query).next() # get the first (TODO: Handle if many)
+    if (doc == None):
+        return False
+    # doc is the database json document with the sessionID
+    docID = doc['_id']
+    userID = doc['sessionIDs'][sessionID]
+
+    print(userID)
+    print(doc['voting'])
+
+    if (userID in doc['voting']):
+        return False
+    else:
+        voting = doc['voting']
+        print(voting)
+        voting[userID] = votes
+        print(voting)
+
+        print(userID)
+        print(doc['voting'])
+        sess_col.update({"_id": ObjectId(docID)}, {"$set" : {"voting" : voting}})
+        return True
+

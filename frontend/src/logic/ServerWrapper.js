@@ -19,7 +19,23 @@ export default class ServerWrapper {
 
     static getServerStatus = async () => {
         const response = (await axios.get(this.hostURL)).data;
-        console.log(response);
+        if (!response.success) { return null; }
+        return response.data;
+    }
+
+    static getSessionInformation = async (sessionID) => {
+        const response = (await axios.get(this.hostURL + "session/" + sessionID)).data;
+        if (!response.success) { return null; }
+        return response.data;
+    }
+
+
+    /*
+        Post functions
+     */
+
+    static postVotesToDatabase = async (sessionID, votes) => {
+        const response = (await axios.post(this.hostURL + "session/" + sessionID, votes)).data;
         if (!response.success) { return null; }
         return response.data;
     }
