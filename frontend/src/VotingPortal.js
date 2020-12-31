@@ -32,8 +32,12 @@ class VotingPortal extends Component {
     async loadContent() {
         const result = await ServerWrapper.getSessionInformation(this.state.sessionID);
         console.log(result);
+        if (!result) {
+            return;
+        }
         this.setState({
-            'data': result
+            'data': result,
+            'loaded': true
         })
     }
 
@@ -130,11 +134,13 @@ class VotingPortal extends Component {
             <>
                 <div className="App">
                     <header className="App-header">
-                        <h1> {this.state.data.title} </h1>
-                        <h2> Welcome {this.state.data.userName} </h2>
-                        {this.state.data.done ? this.displayDoneInformation() :
-                            this.state.data.canVote ? this.displayVoteAction() :
-                                this.displayCannotVote()}
+                        {!this.state.loaded ? <h1> Sorry: This session ID is invalid</h1> : <>
+                            <h1> {this.state.data.title} </h1>
+                            <h2> Welcome {this.state.data.userName} </h2>
+                            {this.state.data.done ? this.displayDoneInformation() :
+                                this.state.data.canVote ? this.displayVoteAction() :
+                                    this.displayCannotVote()} </>
+                        }
                     </header>
                 </div>
             </>

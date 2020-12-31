@@ -61,9 +61,10 @@ def get_session_screen_data(sessionID):
         return None
     sess_col = db[SESS_COL]
     query = {'sessionIDs.' + sessionID : {"$exists" : True}}
-    doc = sess_col.find(query).next() # get the first (TODO: Handle if many)
-    if (doc == None):
+    doc_list = list(sess_col.find(query))
+    if (len(doc_list) == 0):
         return None
+    doc = doc_list[0] # get the first (TODO: Handle if many)
     userID = doc["sessionIDs"][sessionID]
     voterIDs = doc["voters"]
     canVote = False
