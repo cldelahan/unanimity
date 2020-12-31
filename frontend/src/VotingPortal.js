@@ -15,7 +15,9 @@ class VotingPortal extends Component {
                 userName: "",
                 userIDs: [],
                 names: [],
-                canVote: false
+                canVote: false,
+                done: false,
+                distribution: []
             },
             'votes': {}
         }
@@ -29,6 +31,7 @@ class VotingPortal extends Component {
 
     async loadContent() {
         const result = await ServerWrapper.getSessionInformation(this.state.sessionID);
+        console.log(result);
         this.setState({
             'data': result
         })
@@ -76,6 +79,51 @@ class VotingPortal extends Component {
         console.log(votePerc);
     }
 
+    displayVoteAction() {
+        return (
+            <>
+                <>Please vote below</>
+                <p>
+                    {/* Creating boxes for each name */}
+                    <Row style={{"display": "inline"}}>
+
+                        {this.state.data.names.map((name, index) => {
+                            return (
+                                <Col>
+                                    {name} <br/>
+                                    <input id={index} type={"number"} onChange={this.onPercentChange} min="0"
+                                           max="100" required/> (%)
+                                </Col>);
+                        })
+                        }
+                    </Row>
+                    <br/>
+                    <Button onClick={this.submitVotes}>Submit Vote</Button>
+                </p>
+            </>);
+    }
+
+    displayCannotVote() {
+        return (<p> You have already casted your vote for this
+            session. Check back when voting completes. </p>);
+    }
+
+    displayDoneInformation() {
+        let votingHTML = [];
+        for (let i = 0; i < this.state.data.names.length; i++) {
+            votingHTML.push(
+                <>
+                    {this.state.data.names[i]} :: {(100. * this.state.data.distribution[i]).toPrecision(3)}%
+                    <br/>
+                </>);
+        }
+
+        return (
+            <p> Final Results <br/>
+                {votingHTML}
+            </p>
+        );
+    }
 
     render() {
         return (
@@ -84,34 +132,9 @@ class VotingPortal extends Component {
                     <header className="App-header">
                         <h1> {this.state.data.title} </h1>
                         <h2> Welcome {this.state.data.userName} </h2>
-                        <p>
-                            {!this.state.data.canVote ? <>Sorry, you have already casted your vote for this
-                                    session </> :
-                                <>Please vote below</>
-                            }
-                        </p>
-
-                        {this.state.data.canVote ?
-                            <>
-                                {/* Creating boxes for each name */}
-                                <Row style={{"display": "inline"}}>
-
-                                    {this.state.data.names.map((name, index) => {
-                                        return (
-                                            <Col>
-                                                {name} <br/>
-                                                <input id={index} type={"number"} onChange={this.onPercentChange} min="0"
-                                                       max="100" required/> (%)
-                                            </Col>);
-                                    })
-                                    }
-                                </Row>
-
-                                <br/>
-                                <Button onClick={this.submitVotes}>Submit Vote</Button>
-
-                            </> : <></>}
-
+                        {this.state.data.done ? this.displayDoneInformation() :
+                            this.state.data.canVote ? this.displayVoteAction() :
+                                this.displayCannotVote()}
                     </header>
                 </div>
             </>

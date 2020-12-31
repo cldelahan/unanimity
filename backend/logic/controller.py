@@ -9,6 +9,8 @@ from bson.objectid import ObjectId
 # For email sending
 from smtplib import SMTP
 from email.mime.text import MIMEText
+# To run the algoritm
+from . import algorithm
 
 MONGODB_KEY = config('MONGODB_KEY')
 DB_NAME = config('DB_NAME')
@@ -65,21 +67,15 @@ def get_session_screen_data(sessionID):
     userID = doc["sessionIDs"][sessionID]
     voterIDs = doc["voters"]
     canVote = False
-    print(doc)
+    # Determine if they can vote
     if ('voting' not in doc or userID not in doc['voting']):
         canVote = True
-    voterNames = turn_obj_ids_to_name(voterIDs)
+    voterNames = turn_obj_ids_to_name(voterIDs)[0]
     retVoterIDs = []
     for i in voterIDs:
         retVoterIDs.append(i.__str__())
 
-    print(userID)
-    print(voterIDs)
-    print(voterNames)
-
     index = voterIDs.index(ObjectId(userID))
-
-
     result = {
         "_id" : doc["_id"].__str__(),
         "title" : doc["title"],
@@ -88,6 +84,15 @@ def get_session_screen_data(sessionID):
         "names": voterNames,
         "userIDs": retVoterIDs
     }
+
+    # Determine if the session is completed
+    if ('distribution' in doc):
+        result["done"] = True
+        result["distribution"] = doc["distribution"]
+    else:
+        result["done"] = False
+        result["distribution"] = []
+
     return result
 
 
@@ -104,14 +109,17 @@ def turn_obj_ids_to_name(ids):
         return None
     user_col = db[USER_COL]
     names = []
+    emails = []
     for i in ids: # i is an ObjectID
         query = {"_id": i}
         result = user_col.find(query)
         if (result == None):
             names.append("")
+            emails.append("")
         for r in result:
             names.append(r["name"])
-    return names
+            emails.append(r["email"])
+    return [names, emails]
 
 
 '''
@@ -132,21 +140,22 @@ def vote(sessionID, votes):
     # doc is the database json document with the sessionID
     docID = doc['_id']
     userID = doc['sessionIDs'][sessionID]
-
-    print(userID)
-    print(doc['voting'])
-
     if (userID in doc['voting']):
         return False
     else:
         voting = doc['voting']
-        print(voting)
         voting[userID] = votes
-        print(voting)
-
-        print(userID)
-        print(doc['voting'])
         sess_col.update({"_id": ObjectId(docID)}, {"$set" : {"voting" : voting}})
+        # At this point we may have completed all voting. We check for this then terminate the vote
+        doc = sess_col.find(query).next()
+        voting_keys = list(doc["voting"].keys())
+        if (len(voting_keys) == len(doc["voters"])):
+            # We are done voting
+            P = algorithm.json_to_voting_matrix(doc["voters"], doc["voting"])
+            distribution = algorithm.algorithm(P)
+            sess_col.update({"_id": ObjectId(docID)}, {"$set" : {"distribution" : distribution}})
+            # Inform users the voting has completed
+            email_users_voting_is_done(doc["voters"], list(doc["sessionIDs"].keys()), doc["title"])
         return True
 
 '''
@@ -243,6 +252,36 @@ def send_emails(names, emails, sessionIDs, title):
         content += "Please visit www.unanimity.com and use your personalized sessionID: \n"
         content += sessionIDs[i] + "\n"
         content += "Thank you,\n"
+        content += "The Unanimity Team"
+        smtp.sendmail(
+            EMAIL_OUT,
+            emails[i],
+            content)
+    smtp.quit()
+
+
+'''
+Takes a list of userIDs, sessionIDs, and the title of the session and
+informs users that the voting has finished for their session.
+'''
+def email_users_voting_is_done(userIDs, sessionIDs, title):
+    if (not len(userIDs) == len(sessionIDs)):
+        return None
+    [names, emails] = turn_obj_ids_to_name(userIDs)
+    print(names)
+    print(emails)
+    smtp = SMTP()
+    smtp.connect(EMAIL_SERVER, EMAIL_OUT_PORT)
+    smtp.ehlo()
+    smtp.starttls()
+    smtp.ehlo()
+    smtp.login(EMAIL_OUT, EMAIL_PASS)
+    for i in range(len(names)):
+        content = "Hello " + names[i] + "\n"
+        content += "The voting for session: " + title + " has completed. "
+        content += "Please visit www.unanimity.com and use your personalized sessionID:"
+        content += sessionIDs[i] + " to see the results. Thank you for using Unanimity.\n"
+        content += "\n"
         content += "The Unanimity Team"
         smtp.sendmail(
             EMAIL_OUT,

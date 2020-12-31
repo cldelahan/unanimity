@@ -89,40 +89,6 @@ def create_session():
     })
 
 
-
-#######################
-### SIGN IN METHODS ###
-#######################
-
-'''
-# Sign-in methods
-@app.route("/user/<uid>", methods = ["POST"])
-def get_user(uid):
-    return None
-
-
-# Sign-in methods
-@app.route("/sign-in", methods = ["POST"])
-def sign_in():
-    return None
-
-# Process Recording
-@app.route("/recording", methods = ["POST"])
-def process_recording():
-    data = request.get_json(force=True)
-    assert(data['event'] == 'recording.completed')
-    controller.get_meeting_and_metrics(data['payload']['object']['uuid'])
-    return jsonify({
-        'success': True
-    })
-
-# Process Transcript
-@app.route("/transcript", methods = ["POST"])
-def process_transcript():
-    return None
-
-'''
-
 @app.errorhandler(400)
 def not_found(error):
     return jsonify({
