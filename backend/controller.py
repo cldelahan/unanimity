@@ -10,7 +10,7 @@ from bson.objectid import ObjectId
 from smtplib import SMTP
 from email.mime.text import MIMEText
 # To run the algoritm
-from . import algorithm
+import algorithm
 
 MONGODB_KEY = config('MONGODB_KEY')
 DB_NAME = config('DB_NAME')

@@ -1,6 +1,6 @@
 from flask import Flask, request, abort, jsonify
 from flask_cors import CORS
-from logic import controller
+import controller
 
 app = Flask(__name__)
 CORS(app)
