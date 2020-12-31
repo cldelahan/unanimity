@@ -41,7 +41,7 @@ def punish(true_dist, P, harshness=0.1):
     return(result_normed)
 
 ''' Performs the algorithm on a voting matrix, P. '''
-def algorithm(P, harshness = 0.1):
+def algorithm(P, harshness = 0.5):
     true = get_true_distribution(P)
     punished = punish(true, P, harshness)
     return punished.tolist()

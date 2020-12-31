@@ -141,10 +141,13 @@ def vote(sessionID, votes):
     # doc is the database json document with the sessionID
     docID = doc['_id']
     userID = doc['sessionIDs'][sessionID]
-    if (userID in doc['voting']):
+    if ('voting' in doc and userID in doc['voting']):
         return False
     else:
-        voting = doc['voting']
+        if ('voting' not in doc):
+            voting = {}
+        else:
+            voting = doc['voting']
         voting[userID] = votes
         sess_col.update({"_id": ObjectId(docID)}, {"$set" : {"voting" : voting}})
         # At this point we may have completed all voting. We check for this then terminate the vote
