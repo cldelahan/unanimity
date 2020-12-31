@@ -59,10 +59,33 @@ def get_session_screen(sessionID):
 def post_vote(sessionID):
     # print(request.json)
     votes = request.get_json()
-    print(votes)
     res = controller.vote(sessionID, votes)
     return jsonify({
         'success': res
+    })
+
+
+# Given a list of names and emails, create a session and send out emails
+@app.route("/session", methods = ["POST"])
+def create_session():
+    # print(request.json)
+    data = request.get_json()
+    names = data['names']
+    emails = data['emails']
+    title = data['title']
+    ## Put users and emails into database (and get the objectIDs out)
+    userIDs = controller.put_into_user_database(names, emails)
+    print(userIDs)
+    ## Create the session and return its id + the keys for each user
+    [session_objectID, sessionIDs] = controller.create_session(userIDs, title)
+    print(session_objectID)
+    print(sessionIDs)
+    # Send emails to users with the sessionIDs
+    controller.send_emails(names, emails, sessionIDs, title)
+
+
+    return jsonify({
+        'success': True
     })
 
 

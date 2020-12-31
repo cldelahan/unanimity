@@ -38,7 +38,7 @@ class Home extends Component {
                 <div className="App">
                     <header className="App-header">
                         <h1> Unanimity </h1>
-                        {this.state.data}
+                        {/* this.state.data */}
                         <ReactCodeInput
                             className={'Code-input'}
                             type={'text'}
@@ -46,6 +46,7 @@ class Home extends Component {
                             title={'Enter Invite Code Below'}
                             onComplete={this.onCodeInput}
                         />
+                        <br/>
                         <a
                             className={'App-link'}
                             href='/createsession'

@@ -39,4 +39,10 @@ export default class ServerWrapper {
         if (!response.success) { return null; }
         return response.data;
     }
+
+    static createNewSession = async (names, emails, title) => {
+        const response = (await axios.post(this.hostURL + "session", {"names": names, "emails" : emails, "title": title})).data;
+        if (!response.success) { return null; }
+        return response.data;
+    }
 }
