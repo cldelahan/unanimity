@@ -11,8 +11,8 @@ const qs = require('qs');
 
 export default class ServerWrapper {
 
-    static hostURL = 'http://618d4563a3e3.ngrok.io/';
-
+    static hostURL = 'http://6d2ea4a51e74.ngrok.io';
+    // static hostURL = 'http://localhost:5000/';
     /*
         Get all functions, and server status functions
     */
